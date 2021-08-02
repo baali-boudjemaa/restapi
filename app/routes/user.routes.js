@@ -15,7 +15,5 @@ router.post('/users/add', body('id').isNumeric().notEmpty(),
 //i remove auth() from hre
 router.post('/users/addpic', upload.single("picture"), awaitHandlerFactory(Usercontroller.adduserpic))
 router.get('/users/all', Usercontroller.getAllUsers);
-router.get('/az',function (res,req){
-    res.send("zezez");
-});
+router.get('/az', Usercontroller.findAll);
 module.exports = router;

@@ -6,12 +6,29 @@ var express = require('express')
 var multer = require('multer')
 const jwt = require('jsonwebtoken');
 let bcrypt = require('bcryptjs');
+const db = require("../models");
+const users = db.users;
+const Op = db.Sequelize.Op;
 const jwtKey = 'my_secret_key'
 var fs = require('fs');
 let i = 0;
 
 var upload = multer({ dest: 'uploads/' })
 class UserController {
+    findAll = (req, res) => {
+
+
+        users.findAll({  })
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while retrieving tutorials."
+                });
+            });
+    };
     getAllUsers = async (req, res) => {
         return await UserModel.getAllUsers().then(value => {
             console.log("")
