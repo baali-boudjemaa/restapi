@@ -1,9 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-
+const Routers = require('./app/routes/routes');
 const app = express();
-
+const HttpException = require('./app/utils/HttpException');
+const errorMiddleware = require('./app/middleware/error.middleware');
 var corsOptions = {
     origin: "http://example.com"
     ,
@@ -25,13 +26,21 @@ db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log("Drop and re-sync db.");
 // });
-
+app.use('/uploads', express.static('./uploads'));
+app.use(`/api`, Routers);
 // simple route
-app.get("/", (req, res) => {
-    res.json({ message: "Welcome " });
+
+
+app.all('*', (req, res, next) => {
+    console.log(process.env.DB_HOST)
+    // const err = new HttpException(404, 'Endpoint Not Found');
+    // next(err);
+    console.log("dssssssss");
+    res.send({ "name": "ezeze" });
 });
 
-require("./app/routes/turorial.routes")(app);
+// Error middleware
+app.use(errorMiddleware);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

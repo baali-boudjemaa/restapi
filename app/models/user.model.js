@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
-    const User = sequelize.define("user", {
+    return sequelize.define("user", {
         id: {
-            type: DataTypes.INTEGER,
+            type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true // Automatically gets converted to SERIAL for postgres
         },
@@ -18,5 +18,4 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         }
     });
-    return User;
 };

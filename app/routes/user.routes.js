@@ -5,7 +5,7 @@ const awaitHandlerFactory = require('../middleware/awaitHandlerFactory.middlewar
 const auth = require('../middleware/auth')
 const { body } = require('express-validator');
 var multer = require('multer');
-const { NText } = require('mssql');
+
 var upload = multer({ dest: 'uploads/' })
 router.post('/user', auth(),
     awaitHandlerFactory(Usercontroller.findUser));
@@ -15,5 +15,7 @@ router.post('/users/add', body('id').isNumeric().notEmpty(),
 //i remove auth() from hre
 router.post('/users/addpic', upload.single("picture"), awaitHandlerFactory(Usercontroller.adduserpic))
 router.get('/users/all', Usercontroller.getAllUsers);
-router.post('/update_userdata',);
+router.get('/az',function (res,req){
+    res.send("zezez");
+});
 module.exports = router;

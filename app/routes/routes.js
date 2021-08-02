@@ -4,7 +4,7 @@ const router = express.Router();
 const ClassListRouter = require('./Class.route');
 const BlackListRouter = require('./BlackList.route');
 */
-const UserRouter = require('user.routes');
+const UserRouter = require('./user.routes.js');
 
 const auth=require('../middleware/auth')
 
