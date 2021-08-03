@@ -3,19 +3,44 @@ const router = express.Router();
 const Usercontroller = require('../controllers/User.controller');
 const awaitHandlerFactory = require('../middleware/awaitHandlerFactory.middleware');
 const auth = require('../middleware/auth')
-const { body } = require('express-validator');
+const {check, validationResult} = require('express-validator/check');
+
 var multer = require('multer');
 var upload = multer({ dest: 'uploads/' })
 const {  validateLogin } = require('../middleware/validators/validator.middleware');
-router.post('/signin', body('username').notEmpty(),
-    body('password').notEmpty(), Usercontroller.signin);
-router.post('/signup', body('username').notEmpty(),
-    body('password').notEmpty(), Usercontroller.signup);
+const { body ,query} = require('express-validator');
+router.post('/signin', [
+    check('username').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
+],awaitHandlerFactory( Usercontroller.signin));
+router.post('/signup', [
+    check('name').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('username').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('email', 'Your email is not valid').not().isEmpty(),
+    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
+], Usercontroller.signup);
 
-router.post('/user', auth(),
-    awaitHandlerFactory(Usercontroller.findUser));
+router.post('/data', auth,
+    awaitHandlerFactory(Usercontroller.findAll));
 //i remove auth() from hre
 router.post('/users/addpic', upload.single("picture"), awaitHandlerFactory(Usercontroller.adduserpic))
-router.get('/users/all', Usercontroller.getAllUsers);
-router.get('/az', Usercontroller.findAll);
+router.get('/users/all', auth,Usercontroller.getAllUsers);
+router.get('/az', auth,Usercontroller.findAll);
+router.post('/azz', [
+
+        check('username').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
+        check('email', 'Your email is not valid').not().isEmpty(),
+        check('password', 'Your password must be at least 5 characters').not().isEmpty(),
+    ],
+    function (req, res) {
+        const errors = validationResult(req);
+        console.log(req.body);
+
+        if (!errors.isEmpty()) {
+            return res.status(422).jsonp(errors.array());
+        } else {
+            res.send({});
+        }
+    });
+
 module.exports = router;

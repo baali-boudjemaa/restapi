@@ -1,4 +1,4 @@
-const {validationResult, param} = require('express-validator');
+const {body,validationResult, param} = require('express-validator');
 const HttpException = require('../utils/HttpException');
 const dotenv = require('dotenv');
 const UserModel = require('../models/User.model');
@@ -13,14 +13,14 @@ const jwtKey = 'my_secret_key'
 var fs = require('fs');
 let i = 0;
 const User = db.users;
-
+const { v4: uuidv4 } = require('uuid');
 
 
 var upload = multer({dest: 'uploads/'})
 
 class UserController {
     signup = (req, res) => {
-        console.log("signup//////////////////");
+        this.checkValidation(req);
         // Save User to Database
         User.findOne({
             where: {
@@ -46,9 +46,11 @@ class UserController {
                 return;
             }
         });
+
         User.create({
             username: req.body.username,
             email: req.body.email,
+            uid:uuidv4(),
             password: bcrypt.hashSync(req.body.password, 8),
             image :req.body.image
         })
@@ -67,6 +69,7 @@ class UserController {
 
 
     signin = (req, res) => {
+        this.checkValidation(req);
         User.findOne({
             where: {
                 username: req.body.username
@@ -89,7 +92,7 @@ class UserController {
                     });
                 }
 
-                var token = jwt.sign({id: user.id}, config.secret, {
+                var token = jwt.sign({username: user.username}, user.uid, {
                     expiresIn: 86400 // 24 hours
                 });
 
@@ -120,6 +123,7 @@ class UserController {
             });
     };
     findOne = async (req, res) => {
+        this.checkValidation(req.params);
         const username = req.params.username;
 
         users.findOne({where: {username: username}})

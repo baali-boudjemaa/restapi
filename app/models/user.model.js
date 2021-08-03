@@ -4,6 +4,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true // Automatically gets converted to SERIAL for postgres
+        }
+        ,
+        uid: {
+            type: Sequelize.STRING
         },
         username: {
             type: Sequelize.STRING

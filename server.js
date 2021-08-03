@@ -23,13 +23,13 @@ const db = require("./app/models");
 
 //db.sequelize.sync();
 // // drop the table if it already exists
- db.sequelize.sync({ force: true }).then(() => {
+/* db.sequelize.sync({ force: true }).then(() => {
   console.log("Drop and re-sync db.");
-});
+});*/
 app.use('/uploads', express.static('./uploads'));
-app.use(`/api`, Routers);
+app.use(`/api`,  express.urlencoded(),Routers);
 // simple route
-
+app.use(errorMiddleware);
 
 app.all('*', (req, res, next) => {
     console.log(process.env.DB_HOST)
