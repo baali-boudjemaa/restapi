@@ -12,12 +12,87 @@ const Op = db.Sequelize.Op;
 const jwtKey = 'my_secret_key'
 var fs = require('fs');
 let i = 0;
+const User = db.users;
+
+var jwt = require("jsonwebtoken");
+var bcrypt = require("bcryptjs");
+
 
 var upload = multer({ dest: 'uploads/' })
 class UserController {
-    findAll = (req, res) => {
+    signup = (req, res) => {
+    // Save User to Database
+        User.findOne({
+            where: {
+                username: req.body.email
+            }
+        }).then(user => {
+            if (user) {
+                return res.status(404).send({message: "User already exist."});
+            }else {
+                User.create({
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: bcrypt.hashSync(req.body.password, 8)
+                })
+                    .then(user => {
+                        res.status(200).send({
+                            id: user.id,
+                            username: user.username,
+                            email: user.email,
+                        });
+                    })
+                    .catch(err => {
+                        res.status(500).send({ message: err.message });
+                    });
+            }});
 
 
+};
+
+    signin = (req, res) => {
+        User.findOne({
+            where: {
+                username: req.body.username
+            }
+        })
+            .then(user => {
+                if (!user) {
+                    return res.status(404).send({ message: "User Not found." });
+                }
+
+                var passwordIsValid = bcrypt.compareSync(
+                    req.body.password,
+                    user.password
+                );
+
+                if (!passwordIsValid) {
+                    return res.status(401).send({
+                        accessToken: null,
+                        message: "Invalid Password!"
+                    });
+                }
+
+                var token = jwt.sign({ id: user.id }, config.secret, {
+                    expiresIn: 86400 // 24 hours
+                });
+
+                var authorities = [];
+
+                    res.status(200).send({
+                        id: user.id,
+                        username: user.username,
+                        email: user.email,
+                        roles: authorities,
+                        accessToken: token
+                    });
+                })
+
+            .catch(err => {
+                res.status(500).send({ message: err.message });
+            });
+    };
+    findAll = async(req, res) => {
         users.findAll({  })
             .then(data => {
                 res.send(data);
@@ -26,6 +101,19 @@ class UserController {
                 res.status(500).send({
                     message:
                         err.message || "Some error occurred while retrieving tutorials."
+                });
+            });
+    };
+    findOne = async (req, res) => {
+        const username = req.params.username;
+
+        users.findOne({ where: { username:username } })
+            .then(data => {
+                res.send(data);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message: "Error retrieving user with username=" + username
                 });
             });
     };
