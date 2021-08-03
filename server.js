@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const Routers = require('./app/routes/routes');
+require('dotenv').config();
 const app = express();
 const HttpException = require('./app/utils/HttpException');
 const errorMiddleware = require('./app/middleware/error.middleware');
@@ -10,7 +11,7 @@ var corsOptions = {
     ,
     optionsSuccessStatus: 200
 };
-
+console.log( process.env.DB_HOST);
 app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
