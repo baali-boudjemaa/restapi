@@ -1,4 +1,4 @@
-const { validationResult, param } = require('express-validator');
+const {validationResult, param} = require('express-validator');
 const HttpException = require('../utils/HttpException');
 const dotenv = require('dotenv');
 const UserModel = require('../models/User.model');
@@ -14,41 +14,55 @@ var fs = require('fs');
 let i = 0;
 const User = db.users;
 
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
 
 
-var upload = multer({ dest: 'uploads/' })
+var upload = multer({dest: 'uploads/'})
+
 class UserController {
     signup = (req, res) => {
-    // Save User to Database
+        // Save User to Database
         User.findOne({
             where: {
-                username: req.body.email
+                email: req.body.email
             }
         }).then(user => {
             if (user) {
-                return res.status(404).send({message: "User already exist."});
-            }else {
-                User.create({
-                    username: req.body.username,
-                    email: req.body.email,
-                    password: bcrypt.hashSync(req.body.password, 8)
-                })
-                    .then(user => {
-                        res.status(200).send({
-                            id: user.id,
-                            username: user.username,
-                            email: user.email,
-                        });
-                    })
-                    .catch(err => {
-                        res.status(500).send({ message: err.message });
-                    });
-            }});
+                res.status(400).send({
+                    message: "Failed! email is already in use!"
+                });
+                return;
+            }
+        });
+        User.findOne({
+            where: {
+                username: req.body.username
+            }
+        }).then(user => {
+            if (user) {
+                res.status(400).send({
+                    message: "Failed! Username is already in use!"
+                });
+                return;
+            }
+        });
+        User.create({
+            username: req.body.username,
+            email: req.body.email,
+            password: bcrypt.hashSync(req.body.password, 8)
+        })
+            .then(user => {
+                res.status(200).send({
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                });
+            })
+            .catch(err => {
+                res.status(500).send({message: err.message});
+            });
 
+    }
 
-};
 
     signin = (req, res) => {
         User.findOne({
@@ -58,7 +72,7 @@ class UserController {
         })
             .then(user => {
                 if (!user) {
-                    return res.status(404).send({ message: "User Not found." });
+                    return res.status(404).send({message: "User Not found."});
                 }
 
                 var passwordIsValid = bcrypt.compareSync(
@@ -73,27 +87,26 @@ class UserController {
                     });
                 }
 
-                var token = jwt.sign({ id: user.id }, config.secret, {
+                var token = jwt.sign({id: user.id}, config.secret, {
                     expiresIn: 86400 // 24 hours
                 });
 
                 var authorities = [];
 
-                    res.status(200).send({
-                        id: user.id,
-                        username: user.username,
-                        email: user.email,
-                        roles: authorities,
-                        accessToken: token
-                    });
-                })
+                res.status(200).send({
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    token: token
+                });
+            })
 
             .catch(err => {
-                res.status(500).send({ message: err.message });
+                res.status(500).send({message: err.message});
             });
     };
-    findAll = async(req, res) => {
-        users.findAll({  })
+    findAll = async (req, res) => {
+        users.findAll({})
             .then(data => {
                 res.send(data);
             })
@@ -107,7 +120,7 @@ class UserController {
     findOne = async (req, res) => {
         const username = req.params.username;
 
-        users.findOne({ where: { username:username } })
+        users.findOne({where: {username: username}})
             .then(data => {
                 res.send(data);
             })
@@ -132,7 +145,6 @@ class UserController {
         return await UserModel.getUser(us.username).then(value => {
             console.log(value)
             //  return value[0];
-
 
 
             let userinfo = {
@@ -165,7 +177,7 @@ class UserController {
                 throw error;
             }
             const hash = bcrypt.hashSync(req.body.password, 10);
-            UserModel.AddUser({ id: req.body.id, username: req.body.username, password: hash }).then(() => {
+            UserModel.AddUser({id: req.body.id, username: req.body.username, password: hash}).then(() => {
                 res.status(200).send('User created');
             })
         }).catch((errors) => {
@@ -195,19 +207,19 @@ class UserController {
             var username = req.body.username;
 
             console.log("received");
-            UserModel.userupdate({ path, username }).catch((errors) => {
+            UserModel.userupdate({path, username}).catch((errors) => {
                 throw new HttpException(400, ' faild', errors)
             });
         });
-        src.on('error', function (err) { res.json('Something went wrong!'); });
+        src.on('error', function (err) {
+            res.json('Something went wrong!');
+        });
     }
 
     userupdate = (req, res) => {
 
 
-
     }
-
 
 
 }

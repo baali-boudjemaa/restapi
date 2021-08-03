@@ -5,13 +5,15 @@ const awaitHandlerFactory = require('../middleware/awaitHandlerFactory.middlewar
 const auth = require('../middleware/auth')
 const { body } = require('express-validator');
 var multer = require('multer');
-
 var upload = multer({ dest: 'uploads/' })
+const {  validateLogin } = require('../middleware/validators/validator.middleware');
+router.post('/signin', body('username').notEmpty(),
+    body('password').notEmpty(), Usercontroller.signin);
+router.post('/signup', body('username').notEmpty(),
+    body('password').notEmpty(), Usercontroller.signup);
+
 router.post('/user', auth(),
     awaitHandlerFactory(Usercontroller.findUser));
-router.post('/users/add', body('id').isNumeric().notEmpty(),
-    body('username').isAlpha().notEmpty(),
-    body('password').isAlpha().notEmpty(), awaitHandlerFactory(Usercontroller.insertUser));
 //i remove auth() from hre
 router.post('/users/addpic', upload.single("picture"), awaitHandlerFactory(Usercontroller.adduserpic))
 router.get('/users/all', Usercontroller.getAllUsers);
