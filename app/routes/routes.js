@@ -13,6 +13,6 @@ const auth=require('../middleware/auth')
 
 router.use(`/Class`,auth, ClassListRouter);
 router.use(`/BlackList`, auth ,BlackListRouter);*/
-router.use(`/auth`, UserRouter);
+router.use(`/user`, UserRouter);
 
 module.exports=router;
