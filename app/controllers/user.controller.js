@@ -20,6 +20,7 @@ var upload = multer({dest: 'uploads/'})
 
 class UserController {
     signup = (req, res) => {
+        console.log("signup//////////////////");
         // Save User to Database
         User.findOne({
             where: {
@@ -48,7 +49,8 @@ class UserController {
         User.create({
             username: req.body.username,
             email: req.body.email,
-            password: bcrypt.hashSync(req.body.password, 8)
+            password: bcrypt.hashSync(req.body.password, 8),
+            image :req.body.image
         })
             .then(user => {
                 res.status(200).send({
