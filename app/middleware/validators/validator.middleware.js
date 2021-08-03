@@ -1,4 +1,5 @@
 const { body,param } = require('express-validator');
+const {check, validationResult} = require('express-validator/check');
 
 exports.getItemClassSchema = [
     param('id')
@@ -6,6 +7,16 @@ exports.getItemClassSchema = [
         .isNumeric()
         .withMessage('Must be a number')
 
+];
+exports.signin=[
+    check('username').isLength(5).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
+];
+exports.signup=[
+    check('name').isLength(5).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('username').isLength(5).not().isEmpty().withMessage('username must have more than 10 characters'),
+    check('email', 'Your email is not valid').not().isEmpty(),
+    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
 ];
 exports.createClassSchema = [
     body('classID')

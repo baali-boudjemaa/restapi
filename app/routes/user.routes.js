@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Usercontroller = require('../controllers/User.controller');
 const awaitHandlerFactory = require('../middleware/awaitHandlerFactory.middleware');
+const validate = require('../middleware/validators/validator.middleware');
 const auth = require('../middleware/auth')
 const {check, validationResult} = require('express-validator/check');
 
@@ -9,16 +10,8 @@ var multer = require('multer');
 var upload = multer({ dest: 'uploads/' })
 const {  validateLogin } = require('../middleware/validators/validator.middleware');
 const { body ,query} = require('express-validator');
-router.post('/signin', [
-    check('username').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
-    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
-],awaitHandlerFactory( Usercontroller.signin));
-router.post('/signup', [
-    check('name').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
-    check('username').isLength(10).not().isEmpty().withMessage('username must have more than 10 characters'),
-    check('email', 'Your email is not valid').not().isEmpty(),
-    check('password', 'Your password must be at least 5 characters').not().isEmpty(),
-], Usercontroller.signup);
+router.post('/signin',validate.signin,awaitHandlerFactory( Usercontroller.signin));
+router.post('/signup',validate.signup, Usercontroller.signup);
 
 router.post('/data', auth,
     awaitHandlerFactory(Usercontroller.findAll));
