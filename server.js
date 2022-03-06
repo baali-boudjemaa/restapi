@@ -7,11 +7,11 @@ const app = express();
 const HttpException = require('./app/utils/HttpException');
 const errorMiddleware = require('./app/middleware/error.middleware');
 var corsOptions = {
-    origin: "http://example.com"
+    origin: "http://example1.com"
     ,
     optionsSuccessStatus: 200
 };
-console.log( process.env.DB_HOST);
+console.log(process.env.DB_HOST);
 app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
@@ -24,11 +24,12 @@ const db = require("./app/models");
 
 //db.sequelize.sync();
 // // drop the table if it already exists
-/* db.sequelize.sync({ force: true }).then(() => {
-  console.log("Drop and re-sync db.");
-});*/
+//db.sequelize.sync({ force: true }).then(() => {
+//  console.log("Drop and re-sync db.");
+//});
+
 app.use('/uploads', express.static('./uploads'));
-app.use(`/api`,  express.urlencoded(),Routers);
+app.use(`/api`, express.urlencoded(), Routers);
 // simple route
 app.use(errorMiddleware);
 

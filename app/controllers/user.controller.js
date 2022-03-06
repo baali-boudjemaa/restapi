@@ -1,4 +1,4 @@
-const {body,validationResult, param} = require('express-validator');
+const { body, validationResult, param } = require('express-validator');
 const HttpException = require('../utils/HttpException');
 const dotenv = require('dotenv');
 const UserModel = require('../models/User.model');
@@ -16,11 +16,11 @@ const User = db.users;
 const { v4: uuidv4 } = require('uuid');
 
 
-var upload = multer({dest: 'uploads/'})
+var upload = multer({ dest: 'uploads/' })
 
 class UserController {
     signup = (req, res) => {
-        this.checkValidation(req);
+        //  this.checkValidation(req);
         // Save User to Database
         User.findOne({
             where: {
@@ -50,19 +50,20 @@ class UserController {
         User.create({
             username: req.body.username,
             email: req.body.email,
-            uid:uuidv4(),
+            uid: uuidv4(),
             password: bcrypt.hashSync(req.body.password, 8),
-            image :req.body.image
+            image: req.body.image
         })
             .then(user => {
                 res.status(200).send({
                     id: user.id,
                     username: user.username,
                     email: user.email,
+                    token: user.token
                 });
             })
             .catch(err => {
-                res.status(500).send({message: err.message});
+                res.status(500).send({ message: err.message });
             });
 
     }
@@ -77,7 +78,7 @@ class UserController {
         })
             .then(user => {
                 if (!user) {
-                    return res.status(404).send({message: "User Not found."});
+                    return res.status(404).send({ message: "User Not found." });
                 }
 
                 var passwordIsValid = bcrypt.compareSync(
@@ -92,22 +93,27 @@ class UserController {
                     });
                 }
 
-                var token = jwt.sign({username: user.username}, user.uid, {
+                var token = jwt.sign({ username: user.username }, user.uid, {
                     expiresIn: 86400 // 24 hours
                 });
 
                 var authorities = [];
 
                 res.status(200).send({
-                    id: user.id,
+                    userId: user.uid,
                     username: user.username,
                     email: user.email,
-                    token: token
+                    role: user.role,
+                    facebook: user.facebook,
+                    twitter: user.twitter,
+                    linkedIn: user.linkedIn,
+                    token: token,
+                    image: user.image
                 });
             })
 
             .catch(err => {
-                res.status(500).send({message: err.message});
+                res.status(500).send({ message: err.message });
             });
     };
     findAll = async (req, res) => {
@@ -126,7 +132,7 @@ class UserController {
         this.checkValidation(req.params);
         const username = req.params.username;
 
-        users.findOne({where: {username: username}})
+        users.findOne({ where: { username: username } })
             .then(data => {
                 res.send(data);
             })
@@ -137,11 +143,7 @@ class UserController {
             });
     };
     getAllUsers = async (req, res) => {
-        return await UserModel.getAllUsers().then(value => {
-            console.log("")
-            //  return value[0];
-            res.send(value)
-        });
+        return await this.findAll(req, res);
     }
     findUser = async (req, res) => {
         //  this.checkValidation(req);
@@ -183,12 +185,26 @@ class UserController {
                 throw error;
             }
             const hash = bcrypt.hashSync(req.body.password, 10);
-            UserModel.AddUser({id: req.body.id, username: req.body.username, password: hash}).then(() => {
+            UserModel.AddUser({ id: req.body.id, username: req.body.username, password: hash }).then(() => {
                 res.status(200).send('User created');
             })
         }).catch((errors) => {
             throw new HttpException(400, ' faild', errors)
         });
+
+    }
+
+    update = (path, username) => {
+        users.update(
+            { image: path },
+            { where: { username: username } }
+        )
+            .then(result =>
+                console.log(result)
+            )
+            .catch(err =>
+                console.log(err)
+            );
 
     }
 
@@ -201,30 +217,25 @@ class UserController {
     }
     adduserpic = (req, res) => {
 
-        this.checkValidation(req.query);
+        // this.checkValidation(req.query);
         console.log("Received file" + req.file.originalname);
+        console.log(req.body.username);
         var src = fs.createReadStream(req.file.path);
         var dest = fs.createWriteStream('uploads/' + req.file.originalname);
         src.pipe(dest);
-        src.on('end', function () {
+        src.on('end', () => {
             fs.unlinkSync(req.file.path);
             res.json('OK: received ' + req.file.originalname);
             var path = req.file.originalname;
             var username = req.body.username;
 
             console.log("received");
-            UserModel.userupdate({path, username}).catch((errors) => {
-                throw new HttpException(400, ' faild', errors)
-            });
+
+            this.update(path, username);
         });
         src.on('error', function (err) {
             res.json('Something went wrong!');
         });
-    }
-
-    userupdate = (req, res) => {
-
-
     }
 
 
